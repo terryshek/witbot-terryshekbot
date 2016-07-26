@@ -1,0 +1,28 @@
+{
+  "name": "terryshekrob",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon robot.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/terryshek/witbot-terryshekbot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/terryshek/witbot-terryshekbot/issues"
+  },
+  "homepage": "https://github.com/terryshek/witbot-terryshekbot#readme",
+  "dependencies": {
+    "botkit": "^0.2.2",
+    "feedparser": "^1.1.4",
+    "forecast": "^0.2.1",
+    "hongkong-weather": "^1.0.0",
+    "http": "0.0.0",
+    "witbot": "^2.1.0"
+  }
+}
