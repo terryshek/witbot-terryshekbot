@@ -19,11 +19,15 @@
   "homepage": "https://github.com/terryshek/witbot-terryshekbot#readme",
   "dependencies": {
     "botkit": "^0.2.2",
+    "cron": "^1.1.0",
     "feedparser": "^1.1.4",
     "forecast": "^0.2.1",
+    "fs": "0.0.2",
     "hongkong-weather": "^1.0.0",
     "http": "0.0.0",
+    "node-slack-upload": "^1.1.1",
     "os": "^0.1.1",
+    "path": "^0.12.7",
     "witbot": "^2.1.0"
   }
 }

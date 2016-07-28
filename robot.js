@@ -1,10 +1,16 @@
 var Botkit = require('botkit');
 var token =require('./token')
+var Slack = require('node-slack-upload');
+var uploadToken = 'xoxp-4345381608-6783470449-15737127058-1699815eb8'
+var slack = new Slack(token);
 var http = require('http');// Require the module
 var Forecast = require('forecast');
 var rsj = require('./rss');
 var _ = require("lodash")
 var os = require("os")
+var fs = require("fs")
+var path = require("path");
+var CronJob = require('cron').CronJob;
 var controller = Botkit.slackbot({
     debug: false
 });
@@ -21,21 +27,25 @@ bot.startRTM(function(err,bot,payload)
         throw new Error('Could not connect to Slack');
     }else{
         console.log("Connect to slack !")
+        //new CronJob({
+        //    cronTime: '* * * * 1-5',
+        //    onTick: function() {
+        //        bot.say({
+        //            channel: 'pingpong',
+        //            text: ':robot_face:Hello World !',
+        //            username: 'terrybot',
+        //            icon_url: '',
+        //        });
+        //    },
+        //    start: true,
+        //    timeZone: 'Asia/Hong_Kong'
+        //});
     }
 
+
 });
+
 controller.hears(["weather"], ["mention", "direct_mention", "direct_message"], function(bot,message){
-    //rsj.r2j('http://rss.weather.gov.hk/rss/SeveralDaysWeatherForecast.xml',function(json) {
-    //    var loop = _.map(json, "items")
-    //http.get({
-    //    hostname: 'robohash.org/weather',
-    //    path: '/',
-    //    agent: false  // create a new agent just for this one request
-    //}, (res) => {
-    //    // Do stuff with response
-    //    console.log(res)
-    //});
-        //bot.reply(message, json);
         // Initialize
         var forecast = new Forecast({
             service: 'forecast.io',
@@ -51,45 +61,16 @@ controller.hears(["weather"], ["mention", "direct_mention", "direct_message"], f
             if(err) return console.dir(err);
             //console.log(weather.daily.data);
             var info = weather.daily.data
-            bot.reply(message,
-                'Summary: '+info[0].summary +
-                '  high:  ' + info[0].temperatureMax +
-                '  low:  ' + info[0].temperatureMin);
-        });
-    //})
+            var resReport = info[0].summary + '  high:  ' + info[0].temperatureMax + '  low:  ' + info[0].temperatureMin;
+            controller.storage.users.get(message.user, function(err, user) {
+                if (user && user.name) {
+                    bot.reply(message, `${user.name} : ${resReport} !`);
+                } else {
+                    bot.reply(message, resReport);
 
-    //var txt = message.text;
-    //txt = txt.toLowerCase().replace('weather ','');
-    //console.log(txt)
-    //var city = txt.split(',')[0].trim().replace(' ','_');
-    //var state = txt.split(',')[1].trim();
-    //
-    //console.log(city + ', ' + state);
-    //var url = '/api/' + key + '/forecast/q/state/city.json'
-    //url = url.replace('state', state);
-    //url = url.replace('city', city);
-    //
-    //http.get({
-    //    host: 'api.wunderground.com',
-    //    path: url
-    //}, function(response){
-    //    var body = '';
-    //    response.on('data',function(d){
-    //        body += d;
-    //    })
-    //    response.on('end', function(){
-    //        var data = JSON.parse(body);
-    //        var days = data.forecast.simpleforecast.forecastday;
-    //        for(i = 0;i<days.length;i++)
-    //        {
-    //            bot.reply(message, days[i].date.weekday +
-    //                ' high: ' + days[i].high.fahrenheit +
-    //                ' low: ' + days[i].low.fahrenheit +
-    //                ' condition: ' + days[i].conditions);
-    //            bot.reply(message, days[i].icon_url);
-    //        }
-    //    })
-    //})
+                }
+            })
+        });
 });
 controller.hears(['attach'],['direct_message','direct_mention'],function(bot,message) {
 
@@ -148,6 +129,33 @@ controller.hears(['hello', 'hi'], 'direct_message,direct_mention,mention', funct
             bot.reply(message, 'Hello.');
         }
     });
+});
+controller.hears(['your image', 'photo'], 'direct_message,direct_mention,mention', function(bot, message) {
+    console.log(message)
+    slack.uploadFile({
+        file: fs.createReadStream("learningApp.png"),
+        filetype: 'png',
+        title: 'photo',
+        initialComment: 'learning App',
+        channels: message.channel
+    }, function(err) {
+        if (err) {
+            console.log("Failed to add file :(",err)
+            bot.reply(message, 'Sorry, there has been an error: '+err)
+        }
+    });
+    //bot.api.files.upload({
+    //    file: fs.createReadStream("file.txt"),
+    //    filename: "file.txt",
+    //    filetype: "txt",
+    //    channels: message.channel
+    //},function(err,res) {
+    //    if (err) {
+    //        console.log("Failed to add file :(",err)
+    //        bot.reply(message, 'Sorry, there has been an error: '+err)
+    //    }
+    //    console.log(res)
+    //})
 });
 controller.hears(['call me (.*)', 'my name is (.*)'], 'direct_message,direct_mention,mention', function(bot, message) {
     var name = message.match[1];
